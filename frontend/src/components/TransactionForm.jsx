@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../services/api";
 
-function TransactionForm() {
+function TransactionForm({ onTransactionAdded }) {
 
     const [transaction, setTransaction] = useState({
         title: "",
@@ -12,6 +12,8 @@ function TransactionForm() {
         description: ""
     });
 
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (e) => {
         setTransaction({
             ...transaction,
@@ -19,97 +21,222 @@ function TransactionForm() {
         });
     };
 
-    const saveTransaction = async () => {
+    const saveTransaction = async (e) => {
 
-        console.log(transaction);
+        e.preventDefault();
+
+        if (
+            !transaction.title ||
+            !transaction.amount ||
+            !transaction.date
+        ) {
+            alert("Please fill all required fields.");
+            return;
+        }
 
         try {
 
-            await api.post("/transactions", transaction);
+            setLoading(true);
 
-            alert("Transaction Added Successfully");
+            await api.post("/transactions", {
+                ...transaction,
+                amount: Number(transaction.amount)
+            });
 
+alert("Transaction Added Successfully!");
+
+setTransaction({
+    title: "",
+    amount: "",
+    type: "INCOME",
+    category: "SALARY",
+    date: "",
+    description: ""
+});
+
+if (onTransactionAdded) {
+    onTransactionAdded();
+}
+
+            // Temporary refresh so dashboard + table update
             window.location.reload();
 
         } catch (error) {
 
-            console.log(error.response.data);
+            console.error(
+                "Error adding transaction:",
+                error.response?.data || error
+            );
+
+            alert("Failed to add transaction.");
+
+        } finally {
+
+            setLoading(false);
 
         }
     };
 
     return (
 
-        <div>
+        <form
+            className="transaction-form"
+            onSubmit={saveTransaction}
+        >
 
-            <h2>Add Transaction</h2>
+            <div className="form-grid">
 
-            <input
-                name="title"
-                placeholder="Title"
-                onChange={handleChange}
-            />
+                <div className="form-group">
 
-            <br /><br />
+                    <label>Transaction Title *</label>
 
-            <input
-                type="number"
-                name="amount"
-                placeholder="Amount"
-                onChange={handleChange}
-            />
+                    <input
+                        type="text"
+                        name="title"
+                        value={transaction.title}
+                        placeholder="e.g. Monthly Salary"
+                        onChange={handleChange}
+                    />
 
-            <br /><br />
+                </div>
 
-            <select
-                name="type"
-                value={transaction.type}
-                onChange={handleChange}
-            >
-                <option value="INCOME">INCOME</option>
-                <option value="EXPENSE">EXPENSE</option>
-            </select>
 
-            <br /><br />
+                <div className="form-group">
 
-            <select
-                name="category"
-                value={transaction.category}
-                onChange={handleChange}
-            >
-                <option value="SALARY">SALARY</option>
-                <option value="FOOD">FOOD</option>
-                <option value="TRAVEL">TRAVEL</option>
-                <option value="SHOPPING">SHOPPING</option>
-                <option value="BILLS">BILLS</option>
-                <option value="HEALTH">HEALTH</option>
-                <option value="ENTERTAINMENT">ENTERTAINMENT</option>
-                <option value="OTHER">OTHER</option>
-            </select>
+                    <label>Amount *</label>
 
-            <br /><br />
+                    <input
+                        type="number"
+                        name="amount"
+                        value={transaction.amount}
+                        placeholder="₹ 0"
+                        min="0"
+                        step="0.01"
+                        onChange={handleChange}
+                    />
 
-            <input
-                type="date"
-                name="date"
-                onChange={handleChange}
-            />
+                </div>
 
-            <br /><br />
 
-            <input
-                name="description"
-                placeholder="Description"
-                onChange={handleChange}
-            />
+                <div className="form-group">
 
-            <br /><br />
+                    <label>Transaction Type</label>
 
-            <button onClick={saveTransaction}>
-                Add Transaction
-            </button>
+                    <select
+                        name="type"
+                        value={transaction.type}
+                        onChange={handleChange}
+                    >
 
-        </div>
+                        <option value="INCOME">
+                            Income
+                        </option>
+
+                        <option value="EXPENSE">
+                            Expense
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div className="form-group">
+
+                    <label>Category</label>
+
+                    <select
+                        name="category"
+                        value={transaction.category}
+                        onChange={handleChange}
+                    >
+
+                        <option value="SALARY">
+                            Salary
+                        </option>
+
+                        <option value="FOOD">
+                            Food
+                        </option>
+
+                        <option value="TRAVEL">
+                            Travel
+                        </option>
+
+                        <option value="SHOPPING">
+                            Shopping
+                        </option>
+
+                        <option value="BILLS">
+                            Bills
+                        </option>
+
+                        <option value="HEALTH">
+                            Health
+                        </option>
+
+                        <option value="ENTERTAINMENT">
+                            Entertainment
+                        </option>
+
+                        <option value="OTHER">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div className="form-group">
+
+                    <label>Date *</label>
+
+                    <input
+                        type="date"
+                        name="date"
+                        value={transaction.date}
+                        onChange={handleChange}
+                    />
+
+                </div>
+
+
+                <div className="form-group">
+
+                    <label>Description</label>
+
+                    <input
+                        type="text"
+                        name="description"
+                        value={transaction.description}
+                        placeholder="Optional description"
+                        onChange={handleChange}
+                    />
+
+                </div>
+
+            </div>
+
+
+            <div className="form-actions">
+
+                <button
+                    type="submit"
+                    className="primary-button"
+                    disabled={loading}
+                >
+
+                    {loading
+                        ? "Adding..."
+                        : "+ Add Transaction"
+                    }
+
+                </button>
+
+            </div>
+
+        </form>
 
     );
 }

@@ -1,55 +1,154 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function SummaryCards(){
+function SummaryCards({ refreshKey }) {
 
-    const[dashboard,setDashboard]=useState({
-        totalIncome:0,
-        totalExpense:0,
-        balance:0
+    const [summary, setSummary] = useState({
+        totalIncome: 0,
+        totalExpense: 0,
+        balance: 0
     });
 
-    useEffect(()=>{
+    const [loading, setLoading] = useState(true);
 
-        loadDashboard();
+useEffect(() => {
+    loadDashboard();
+}, []);
 
-    },[]);
+    const loadDashboard = async () => {
 
-    const loadDashboard=async()=>{
+        try {
 
-        const response=await api.get("/transactions/dashboard");
+            const response =
+                await api.get("/transactions/dashboard");
 
-        setDashboard(response.data);
+            setSummary(response.data);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load dashboard:",
+                error
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+    const formatCurrency = (amount) => {
+
+        return new Intl.NumberFormat(
+            "en-IN",
+            {
+                style: "currency",
+                currency: "INR",
+                maximumFractionDigits: 0
+            }
+        ).format(amount || 0);
+
+    };
+
+    if (loading) {
+
+        return (
+            <div className="summary-loading">
+                Loading financial summary...
+            </div>
+        );
 
     }
 
-    return(
+    return (
 
-        <div style={{
+        <section className="summary-grid">
 
-            display:"flex",
-            justifyContent:"space-around"
+            <div className="summary-card income-card">
 
-        }}>
+                <div className="summary-card-top">
 
-            <div>
-                <h3>💵 Income</h3>
-                <h2>₹{dashboard.totalIncome}</h2>
+                    <div>
+                        <p>Total Income</p>
+
+                        <h2>
+                            {formatCurrency(
+                                summary.totalIncome
+                            )}
+                        </h2>
+                    </div>
+
+                    <div className="summary-icon">
+                        ↑
+                    </div>
+
+                </div>
+
+                <span className="summary-label">
+                    Money received
+                </span>
+
             </div>
 
-            <div>
-                <h3>💸 Expense</h3>
-                <h2>₹{dashboard.totalExpense}</h2>
+
+            <div className="summary-card expense-card">
+
+                <div className="summary-card-top">
+
+                    <div>
+                        <p>Total Expenses</p>
+
+                        <h2>
+                            {formatCurrency(
+                                summary.totalExpense
+                            )}
+                        </h2>
+                    </div>
+
+                    <div className="summary-icon">
+                        ↓
+                    </div>
+
+                </div>
+
+                <span className="summary-label">
+                    Money spent
+                </span>
+
             </div>
 
-            <div>
-                <h3>💰 Balance</h3>
-                <h2>₹{dashboard.balance}</h2>
+
+            <div className="summary-card balance-card">
+
+                <div className="summary-card-top">
+
+                    <div>
+                        <p>Current Balance</p>
+
+                        <h2>
+                            {formatCurrency(
+                                summary.balance
+                            )}
+                        </h2>
+                    </div>
+
+                    <div className="summary-icon">
+                        ₹
+                    </div>
+
+                </div>
+
+                <span className="summary-label">
+                    Available balance
+                </span>
+
             </div>
 
-        </div>
+        </section>
 
-    )
+    );
 
 }
 
