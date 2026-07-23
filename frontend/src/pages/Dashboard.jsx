@@ -8,34 +8,32 @@ import Charts from "../components/Charts";
 
 import "../styles/dashboard.css";
 
+
 function Dashboard() {
 
-    // Whenever this number changes,
-    // dashboard components fetch fresh data.
     const [refreshKey, setRefreshKey] = useState(0);
 
 
-    // Called after Add / Edit / Delete
     const refreshDashboard = () => {
 
-        setRefreshKey((previous) => previous + 1);
+        setRefreshKey(
+            (previous) => previous + 1
+        );
 
     };
 
 
     return (
 
-        <div className="dashboard">
+        <div className="dashboard-page">
 
             <Navbar />
 
 
-            <main className="dashboard-content">
+            <main className="dashboard-container">
 
 
-                {/* =========================
-                    DASHBOARD HEADER
-                ========================= */}
+                {/* DASHBOARD HEADER */}
 
                 <div className="dashboard-header">
 
@@ -55,33 +53,41 @@ function Dashboard() {
                 </div>
 
 
-                {/* =========================
-                    SUMMARY CARDS
-                ========================= */}
+                {/* SUMMARY */}
 
                 <SummaryCards
                     refreshKey={refreshKey}
                 />
 
 
-                {/* =========================
-                    CHARTS
-                ========================= */}
+                {/* CHARTS */}
 
                 <Charts
                     refreshKey={refreshKey}
                 />
 
 
-                {/* =========================
-                    ADD TRANSACTION
-                ========================= */}
+                {/* ADD TRANSACTION */}
 
                 <section className="dashboard-section">
 
-                    <h2>
-                        Add Transaction
-                    </h2>
+                    <div className="section-header">
+
+                        <div>
+
+                            <h2>
+                                Add Transaction
+                            </h2>
+
+                            <p>
+                                Record your income
+                                and expenses.
+                            </p>
+
+                        </div>
+
+                    </div>
+
 
                     <TransactionForm
                         onTransactionAdded={
@@ -92,26 +98,33 @@ function Dashboard() {
                 </section>
 
 
-                {/* =========================
-                    TRANSACTION TABLE
-                ========================= */}
+                {/* TRANSACTIONS */}
 
                 <section className="dashboard-section">
 
-                    <h2>
-                        Recent Transactions
-                    </h2>
+                    <div className="section-header">
+
+                        <div>
+
+                            <h2>
+                                Recent Transactions
+                            </h2>
+
+                            <p>
+                                Search, edit and manage
+                                your transactions.
+                            </p>
+
+                        </div>
+
+                    </div>
+
 
                     <TransactionTable
-
-                        refreshKey={
-                            refreshKey
-                        }
-
+                        refreshKey={refreshKey}
                         onTransactionChanged={
                             refreshDashboard
                         }
-
                     />
 
                 </section>
@@ -124,5 +137,6 @@ function Dashboard() {
     );
 
 }
+
 
 export default Dashboard;
