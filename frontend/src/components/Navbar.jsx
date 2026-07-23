@@ -1,4 +1,39 @@
+import { useEffect, useState } from "react";
+import api from "../services/api";
+
+
 function Navbar() {
+
+    const [user, setUser] = useState(null);
+
+
+    useEffect(() => {
+
+        const loadCurrentUser = async () => {
+
+            try {
+
+                const response =
+                    await api.get("/auth/me");
+
+                setUser(response.data);
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to load current user:",
+                    error
+                );
+
+            }
+
+        };
+
+
+        loadCurrentUser();
+
+    }, []);
+
 
     const handleLogout = () => {
 
@@ -7,6 +42,13 @@ function Navbar() {
         window.location.href = "/";
 
     };
+
+
+    const initial =
+        user?.name
+            ? user.name.charAt(0).toUpperCase()
+            : "?";
+
 
     return (
 
@@ -21,17 +63,45 @@ function Navbar() {
                     </div>
 
                     <div>
+
                         <h2>FinTrack</h2>
-                        <span>Personal Finance Tracker</span>
+
+                        <span>
+                            Personal Finance Tracker
+                        </span>
+
                     </div>
 
                 </div>
 
+
                 <div className="navbar-actions">
 
-                    <div className="user-avatar">
-                        R
+                    <div className="user-info">
+
+                        <div className="user-avatar">
+                            {initial}
+                        </div>
+
+
+                        {user && (
+
+                            <div className="user-details">
+
+                                <strong>
+                                    {user.name}
+                                </strong>
+
+                                <span>
+                                    {user.email}
+                                </span>
+
+                            </div>
+
+                        )}
+
                     </div>
+
 
                     <button
                         className="logout-button"
@@ -49,5 +119,6 @@ function Navbar() {
     );
 
 }
+
 
 export default Navbar;
